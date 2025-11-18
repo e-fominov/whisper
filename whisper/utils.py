@@ -85,8 +85,9 @@ def get_end(segments: List[dict]) -> Optional[float]:
 class ResultWriter:
     extension: str
 
-    def __init__(self, output_dir: str):
+    def __init__(self, output_dir: str, suffix: str = ""):
         self.output_dir = output_dir
+        self.suffix = suffix
 
     def __call__(
         self, result: dict, audio_path: str, options: Optional[dict] = None, **kwargs
@@ -94,7 +95,7 @@ class ResultWriter:
         audio_basename = os.path.basename(audio_path)
         audio_basename = os.path.splitext(audio_basename)[0]
         output_path = os.path.join(
-            self.output_dir, audio_basename + "." + self.extension
+            self.output_dir, audio_basename + self.suffix + "." + self.extension
         )
 
         with open(output_path, "w", encoding="utf-8") as f:
@@ -294,7 +295,7 @@ class WriteJSON(ResultWriter):
 
 
 def get_writer(
-    output_format: str, output_dir: str
+    output_format: str, output_dir: str, suffix: str = ""
 ) -> Callable[[dict, TextIO, dict], None]:
     writers = {
         "txt": WriteTXT,
@@ -305,7 +306,7 @@ def get_writer(
     }
 
     if output_format == "all":
-        all_writers = [writer(output_dir) for writer in writers.values()]
+        all_writers = [writer(output_dir, suffix=suffix) for writer in writers.values()]
 
         def write_all(
             result: dict, file: TextIO, options: Optional[dict] = None, **kwargs
@@ -315,4 +316,4 @@ def get_writer(
 
         return write_all
 
-    return writers[output_format](output_dir)
+    return writers[output_format](output_dir, suffix=suffix)

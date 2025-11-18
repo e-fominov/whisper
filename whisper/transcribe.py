@@ -564,6 +564,7 @@ def cli():
     parser.add_argument("--threads", type=optional_int, default=0, help="number of threads used by torch for CPU inference; supercedes MKL_NUM_THREADS/OMP_NUM_THREADS")
     parser.add_argument("--clip_timestamps", type=str, default="0", help="comma-separated list start,end,start,end,... timestamps (in seconds) of clips to process, where the last end timestamp defaults to the end of the file")
     parser.add_argument("--hallucination_silence_threshold", type=optional_float, help="(requires --word_timestamps True) skip silent periods longer than this threshold (in seconds) when a possible hallucination is detected")
+    parser.add_argument("--suffix", type=str, default="", help="suffix to append to output filenames (e.g., '_transcription')")
     # fmt: on
 
     args = parser.parse_args().__dict__
@@ -571,6 +572,7 @@ def cli():
     model_dir: str = args.pop("model_dir")
     output_dir: str = args.pop("output_dir")
     output_format: str = args.pop("output_format")
+    suffix: str = args.pop("suffix")
     device: str = args.pop("device")
     os.makedirs(output_dir, exist_ok=True)
 
@@ -594,7 +596,7 @@ def cli():
 
     model = load_model(model_name, device=device, download_root=model_dir)
 
-    writer = get_writer(output_format, output_dir)
+    writer = get_writer(output_format, output_dir, suffix=suffix)
     word_options = [
         "highlight_words",
         "max_line_count",
